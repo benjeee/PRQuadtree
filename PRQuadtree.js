@@ -1,5 +1,5 @@
-var GRAPH_WIDTH 	= 512;
-var GRAPH_HEIGHT 	= 512;
+var GRAPH_WIDTH;
+var GRAPH_HEIGHT;
 
 class Node {
 	constructor(parent, level, centerLoc) {
@@ -90,21 +90,19 @@ class Node {
 			if (this.isLeaf) {
 				this.isLeaf = false;
 				this.value = null;
-				this.parent.cascadeUp();
+				if(this.parent){
+					this.parent.cascadeUp();
+				}
 			}
 		}
 	}
 
 	cascadeUp() {
-		if (!this) { 
-			return;
-		}
-
 		let numChildren = 0;
 		let newVal = null;
 		this.children.forEach(function (child) {
 			if (child.isParent) {
-				return;
+				numChildren=999;
 			}
 			if (child.isLeaf) {
 				newVal = child.value;
@@ -119,14 +117,17 @@ class Node {
 			this.isLeaf = true;
 			this.value = newVal;
 			this.children = null;
-			this.parent.cascadeUp();
+			if(this.parent){
+				this.parent.cascadeUp();
+			}
 		} else {
-			
 			this.isParent = false;
 			this.isLeaf = false;
 			this.value = null;
 			this.children = null;
-			this.parent.cascadeUp();
+			if(this.parent){
+				this.parent.cascadeUp();
+			}
 		}
 		
 	}
@@ -151,7 +152,7 @@ class Node {
 			
 		} else {
 			if(this.isLeaf){
-				context.fillRect(~~(this.value.x)-1, ~~(this.value.y)-1, 4, 4);
+				context.fillRect(~~(this.value.x)-1, ~~(this.value.y)-1, 2, 2);
 			}
 		}
 	}
@@ -191,8 +192,6 @@ class Node {
 
 class PRQuadtree {
 	constructor(width, height) {
-		this.width 	= width;
-		this.height = height;
 		GRAPH_HEIGHT = height;
 		GRAPH_WIDTH = width;
 		this.root 	= new Node(null, 0, 
@@ -216,10 +215,10 @@ class PRQuadtree {
 	}
 
 	render(canvas, context) {
-		context.strokeStyle = "#FFAA00";
-		context.fillStyle = "#999999";
+		context.strokeStyle = "#FF2200";
+		context.fillStyle = "#000000";
 		context.clearRect(0, 0, canvas.width, canvas.height);
-		this.root.render(this.width, this.height, context);
+		this.root.render(canvas.width, canvas.width, context);
 	}
 }
 
@@ -233,7 +232,7 @@ context.strokeStyle = "#666666";
 var container = document.getElementById("canvasContainer");
 context.fillRect(0,0,canvas.width,canvas.height);
 
-var pq = new PRQuadtree(512, 512);
+var pq = new PRQuadtree(canvas.width, canvas.height);
 
 pq.render(canvas, context);
 
@@ -246,3 +245,14 @@ canvas.onclick = function(e){
 	e.preventDefault();
 	return false;
 };
+
+canvas.oncontextmenu = function(e) {
+	pq.remove({
+		 x: e.clientX - container.offsetLeft
+		,y: e.clientY - container.offsetTop
+	});
+	pq.render(canvas, context);
+	e.preventDefault();
+	return false; 
+}
+
