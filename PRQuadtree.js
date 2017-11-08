@@ -134,25 +134,22 @@ class Node {
 
 	render(width, height, context){
 		if(this.isParent){
-			
 			context.beginPath();
-			context.moveTo(~~(this.centerLoc.x)+0.5, ~~(this.centerLoc.y-height/2)+0.5);
-			context.lineTo(~~(this.centerLoc.x)+0.5, ~~(this.centerLoc.y+height/2)+0.5);
+			context.moveTo(Math.floor(this.centerLoc.x)+0.5, Math.floor(this.centerLoc.y-height/2)+0.5);
+			context.lineTo(Math.floor(this.centerLoc.x)+0.5, Math.floor(this.centerLoc.y+height/2)+0.5);
 			context.stroke();
 			
 			context.beginPath();
-			context.moveTo(~~(this.centerLoc.x - width/2)+0.5, ~~(this.centerLoc.y)+0.5);
-			context.lineTo(~~(this.centerLoc.x + width/2)+0.5, ~~(this.centerLoc.y)+0.5);
+			context.moveTo(Math.floor(this.centerLoc.x - width/2)+0.5, Math.floor(this.centerLoc.y)+0.5);
+			context.lineTo(Math.floor(this.centerLoc.x + width/2)+0.5, Math.floor(this.centerLoc.y)+0.5);
 			context.stroke();
 
-			this.children[0].render(width/2, height/2, context);
-			this.children[1].render(width/2, height/2, context);
-			this.children[2].render(width/2, height/2, context);
-			this.children[3].render(width/2, height/2, context);
-			
+			this.children.forEach(function (child) {
+				child.render(width/2, height/2, context)
+			});
 		} else {
 			if(this.isLeaf){
-				context.fillRect(~~(this.value.x)-1, ~~(this.value.y)-1, 2, 2);
+				context.fillRect(Math.floor(this.value.x)-1, Math.floor(this.value.y)-1, 2, 2);
 			}
 		}
 	}
