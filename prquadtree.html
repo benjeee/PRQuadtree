@@ -3,13 +3,26 @@
     <title>PRQuadtree!</title>
   </head>
   <body>
-  	<div id="canvasContainer">
+  	<div id="canvas">
 		<canvas id="prqt" width="512" height="512" style="border:2px solid #000000;"></canvas>
 	</div>
+	<div id="count">Count: 0</div>
+	<button id="clear">Clear Points</button>
 	<div id="instructions">
 		<p>
 			left click -> insert point at position </br>
-			right click -> remove point contained in region
+			right click -> remove point contained in region </br>
+		</p>
+		<p>
+			_____________________________________</br>
+			PR (Point Region) Quadtree visualization </br>
+			</br>
+			basics of PRQuadtrees:</br>
+			-nodes describe regions</br>
+			-regions are containers for 2dimensional data</br>
+			-regions have 3 states: empty (no value, no children), leaf (has value, no children), parent (no value, has 4 children)</br>
+			-if a point is inserted into a region that contains a point already (leaf), it will recursively split the region in four quarters until each point has its own region</br>
+			-perform best with uniform point distribution (high point to depth ratio), performance not dependent on order of insertion
 		</p>
 	</div>
     <script type="text/javascript" src="PRQuadtree.js"></script>

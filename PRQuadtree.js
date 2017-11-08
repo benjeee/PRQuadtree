@@ -7,32 +7,30 @@ class Node {
 		this.level 		= level;
 		this.centerLoc 	= centerLoc;
 	}
-/*
-	0 1
-	2 3
-*/
+
 	insert(value) {
 		if (this.isParent) {
 			if (value.y < this.centerLoc.y) {
 				if (value.x < this.centerLoc.x) {
-					this.children[0].insert(value);
+					return this.children[0].insert(value);
 				} else {
-					this.children[1].insert(value);
+					return this.children[1].insert(value);
 				}
 			} else {
 				if (value.x < this.centerLoc.x) {
-					this.children[2].insert(value);
+					return this.children[2].insert(value);
 				} else {
-					this.children[3].insert(value);
+					return this.children[3].insert(value);
 				}
 			}
 		} else {
 			if (!this.isLeaf) {
 				this.isLeaf = true;
 				this.value = value;
+				return true;
 			} else {
 				if(this.value.y == value.y && this.value.x == value.x){
-					return;
+					return false;
 				}
 				this.isLeaf = false;
 				this.isParent = true;
@@ -64,8 +62,8 @@ class Node {
 					)
 				];
 				this.insert(this.value)
-				this.insert(value)
 				this.value=null;
+				return this.insert(value)
 			}
 		}
 	}
@@ -75,15 +73,15 @@ class Node {
 		if (this.isParent) {
 			if (value.y < this.centerLoc.y) {
 				if (value.x < this.centerLoc.x) {
-					this.children[0].remove(value);
+					return this.children[0].remove(value);
 				} else {
-					this.children[1].remove(value);
+					return this.children[1].remove(value);
 				}
 			} else {
 				if (value.x < this.centerLoc.x) {
-					this.children[2].remove(value);
+					return this.children[2].remove(value);
 				} else {
-					this.children[3].remove(value);
+					return this.children[3].remove(value);
 				}
 			}
 		} else {
@@ -93,7 +91,11 @@ class Node {
 				if(this.parent){
 					this.parent.cascadeUp();
 				}
+				return true;
+			} else {
+				return false;
 			}
+			
 		}
 	}
 
@@ -129,10 +131,9 @@ class Node {
 				this.parent.cascadeUp();
 			}
 		}
-		
 	}
 
-	render(width, height, context){
+	draw(width, height, context){
 		if(this.isParent){
 			context.beginPath();
 			context.moveTo(Math.floor(this.centerLoc.x)+0.5, Math.floor(this.centerLoc.y-height/2)+0.5);
@@ -145,7 +146,7 @@ class Node {
 			context.stroke();
 
 			this.children.forEach(function (child) {
-				child.render(width/2, height/2, context)
+				child.draw(width/2, height/2, context)
 			});
 		} else {
 			if(this.isLeaf){
@@ -191,6 +192,7 @@ class PRQuadtree {
 	constructor(width, height) {
 		GRAPH_HEIGHT = height;
 		GRAPH_WIDTH = width;
+		this.count = 0;
 		this.root 	= new Node(null, 0, 
 			{
 				x:width/2,
@@ -200,7 +202,9 @@ class PRQuadtree {
 	}
 
 	insert(value) {
-		this.root.insert(value);
+		if(this.root.insert(value)){
+			this.count++;
+		}
 	}
 
 	find(value) {
@@ -208,48 +212,68 @@ class PRQuadtree {
 	}
 
 	remove(value) {
-		this.root.remove(value);
+		if(this.root.remove(value)){
+			this.count--;
+		}
 	}
 
-	render(canvas, context) {
+	draw(canvas, context) {
 		context.strokeStyle = "#FF2200";
 		context.fillStyle = "#000000";
 		context.clearRect(0, 0, canvas.width, canvas.height);
-		this.root.render(canvas.width, canvas.width, context);
+		this.root.draw(canvas.width, canvas.width, context);
 	}
 }
 
 
+
+/*****************************************************
+**********************DRIVER CODE*********************
+******************************************************/
+function updateCount(){
+	count.innerHTML = "Count: " + pq.count;
+}
 
 const canvas = document.getElementById('prqt');
 const context = canvas.getContext('2d');
 
 context.fillStyle = '#000';
 context.strokeStyle = "#666666";
-var container = document.getElementById("canvasContainer");
+var canvasDiv = document.getElementById("canvas");
 context.fillRect(0,0,canvas.width,canvas.height);
 
 var pq = new PRQuadtree(canvas.width, canvas.height);
 
-pq.render(canvas, context);
+pq.draw(canvas, context);
+
+var count = document.getElementById("count");
+var clear = document.getElementById("clear");
 
 canvas.onclick = function(e){
 	pq.insert({
-		 x: e.clientX - container.offsetLeft
-		,y: e.clientY - container.offsetTop
+		 x: e.clientX - canvasDiv.offsetLeft
+		,y: e.clientY - canvasDiv.offsetTop
 	});
-	pq.render(canvas, context);
+	updateCount();
+	pq.draw(canvas, context);
 	e.preventDefault();
 	return false;
 };
 
 canvas.oncontextmenu = function(e) {
 	pq.remove({
-		 x: e.clientX - container.offsetLeft
-		,y: e.clientY - container.offsetTop
+		 x: e.clientX - canvasDiv.offsetLeft
+		,y: e.clientY - canvasDiv.offsetTop
 	});
-	pq.render(canvas, context);
+	updateCount();
+	pq.draw(canvas, context);
 	e.preventDefault();
 	return false; 
+}
+
+clear.onclick = function(){
+	pq = new PRQuadtree(canvas.width, canvas.height);
+	pq.draw(canvas, context);
+	updateCount();
 }
 
